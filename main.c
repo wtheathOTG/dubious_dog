@@ -1,67 +1,50 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <math.h>
+#include "p_player.h"
+#include "g_game_state.h"
+#include "w_window.h"
+#include "r_renderer.h"
+#include "k_keyboard.h"
 
-#include <SDL.h>
-#include <SDL_main.h>  // helps avoid WinMain linker errors on Windows
+#define SCREENW 1024
+#define SCREENH 768
+#define FPS 120
 
-#define WINDOW_TITLE "dubious dog"
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+void GameLoop(game_state_t *game_state, player_t *player) {
+    while (game_state->is_running) {
+        G_FrameStart();
 
-typedef struct Game {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-} Game;
+        K_HandleEvents(game_state, player);
+        R_Render(player, game_state);
 
-bool sdl_initialized(Game *game);
-void game_cleanup(Game *game);
+        G_FrameEnd(game_state);
+    }
+}
 
-int main(int argc, char* argv[]) {
-    Game game = {
-        .window = NULL,
-        .renderer = NULL,
+int main() {
+    game_state_t game_state = G_Init(SCREENW, SCREENH, FPS);
+    player_t player = P_Init(40, 40, SCREENH * 10, M_PI / 2);
+    K_InitKeymap();
+    W_Init(SCREENW, SCREENH);
+    R_Init(W_Get(), &game_state);
+
+
+    sector_t s1 = R_CreateSector(10, 0, 0xd6382d, 0xf54236, 0x9c2921);
+    int s1v[4*4] = {
+        70, 220, 100, 220,
+        100, 220, 100, 240,
+        100, 240, 70, 240,
+        70, 240, 70, 220
     };
-    if (sdl_initialized(&game)) {
-        game_cleanup(&game);
-        exit(1);
+
+    for (int i = 0; i < 16; i += 4) {
+        wall_t w = R_CreateWall(s1v[i], s1v[i+1], s1v[i+2], s1v[i+3]);
+        R_SectorAddWall(&s1, w);
     }
 
-    SDL_Delay(1000);
+    R_AddSectorToQueue(&s1);
 
-    game_cleanup(&game);
+    GameLoop(&game_state, &player);
+
     return 0;
-}
-
-bool sdl_initialized(Game *game) {
-    if (SDL_Init(SDL_INIT_VIDEO)) {
-        fprintf(stderr,"Error initializing SDL: %s\n", SDL_GetError());
-        return true;
-    }
-
-    game->window = SDL_CreateWindow(
-        WINDOW_TITLE,
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT,
-        0
-    );
-    if (game->window == NULL) {
-        fprintf(stderr,"Error creating window: %s\n", SDL_GetError());
-        return true;
-    }
-
-    game->renderer = SDL_CreateRenderer(game->window, -1, 0);
-    if (game->renderer == NULL) {
-        fprintf(stderr,"Error creating renderer: %s\n", SDL_GetError());
-        return true;
-    }
-
-    return false;
-}
-
-void game_cleanup(Game *game) {
-    SDL_DestroyRenderer(game->renderer);
-    SDL_DestroyWindow(game->window);
-    SDL_Quit();
 }

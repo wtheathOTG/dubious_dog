@@ -5,7 +5,20 @@ set(CMAKE_C_STANDARD 11)
 
 set(SDL2_ROOT "C:/Libraries/SDL2/SDL2-devel-2.32.8-mingw/SDL2-2.32.8/x86_64-w64-mingw32")
 
-add_executable(dubious_dog main.c)
+add_executable(dubious_dog main.c
+        typedefs.h
+        r_renderer.h
+        g_game_state.h
+        g_game_state.c
+        p_player.h
+        p_player.c
+        u_utils.h
+        u_utils.c
+        k_keyboard.h
+        k_keyboard.c
+        w_window.h
+        w_window.c
+        r_renderer.c)
 
 # Headers & libs
 target_include_directories(dubious_dog PRIVATE "${SDL2_ROOT}/include/SDL2")
