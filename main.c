@@ -30,6 +30,8 @@ int main() {
 
 
     sector_t s1 = R_CreateSector(10, 0, 0xd6382d, 0xf54236, 0x9c2921);
+    sector_t s2 = R_CreateSector(80, 0, 0x29b148, 0x43f068, 0x209138);
+
     int s1v[4*4] = {
         70, 220, 100, 220,
         100, 220, 100, 240,
@@ -37,12 +39,22 @@ int main() {
         70, 240, 70, 220
     };
 
+    int s2v[4*4] = {
+        30, 120, 40, 120,
+        40, 120, 40, 190,
+        40, 190, 30, 190,
+        30, 190, 30, 120
+    };
+
     for (int i = 0; i < 16; i += 4) {
         wall_t w = R_CreateWall(s1v[i], s1v[i+1], s1v[i+2], s1v[i+3]);
         R_SectorAddWall(&s1, w);
+        w = R_CreatePortal(s2v[i], s2v[i+1], s2v[i+2], s2v[i+3], 20, 10);
+        R_SectorAddWall(&s2, w);
     }
 
     R_AddSectorToQueue(&s1);
+    R_AddSectorToQueue(&s2);
 
     GameLoop(&game_state, &player);
 
