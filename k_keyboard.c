@@ -2,19 +2,19 @@
 
 keymap_t keymap;
 keystates_t keystates;
-const double MOVE_SPEED = 50.0;
-const double ELEVATION_SPEED = 100 * 100;
+const double MOVE_SPEED = 75.0;
+const double ELEVATION_SPEED = 200 * 100;
 const double ROT_SPEED = 1;
 
 void K_InitKeymap() {
-    keymap.left = SDL_SCANCODE_A;
-    keymap.right = SDL_SCANCODE_D;
+    keymap.left = SDL_SCANCODE_LEFT;
+    keymap.right = SDL_SCANCODE_RIGHT;
     keymap.forward = SDL_SCANCODE_W;
     keymap.backward = SDL_SCANCODE_S;
-    keymap.strafe_left = SDL_SCANCODE_Q;
-    keymap.strafe_right = SDL_SCANCODE_E;
-    keymap.up = SDL_SCANCODE_SPACE;
-    keymap.down = SDL_SCANCODE_LCTRL;
+    keymap.strafe_left = SDL_SCANCODE_A;
+    keymap.strafe_right = SDL_SCANCODE_D;
+    keymap.up = SDL_SCANCODE_UP;
+    keymap.down = SDL_SCANCODE_DOWN;
     keymap.quit = SDL_SCANCODE_ESCAPE;
     keymap.toggle_map = SDL_SCANCODE_M;
     keymap.debug_mode = SDL_SCANCODE_O;
@@ -57,37 +57,20 @@ void K_HandleEvents(game_state_t *game_state, player_t *player) {
 }
 
 void K_ProcessKeyStates(player_t *player, double delta_time) {
-    if (keystates.forward) {
-        player->position.x += MOVE_SPEED * cos(player->dir_angle) * delta_time;
-        player->position.y += MOVE_SPEED * sin(player->dir_angle) * delta_time;
-    }
-    else if (keystates.backward) {
-        player->position.x -= MOVE_SPEED * cos(player->dir_angle) * delta_time;
-        player->position.y -= MOVE_SPEED * sin(player->dir_angle) * delta_time;
-    }
 
-    if (keystates.left) {
-        player->dir_angle += ROT_SPEED * delta_time;
-    }
-    else if (keystates.right) {
-        player->dir_angle -= ROT_SPEED * delta_time;
-    }
+    const int forwardAxis = keystates.forward - keystates.backward;
+    player->position.x += forwardAxis * MOVE_SPEED * cos(player->dir_angle) * delta_time;
+    player->position.y += forwardAxis * MOVE_SPEED * sin(player->dir_angle) * delta_time;
 
-    if (keystates.s_left) {
-        player->position.x += MOVE_SPEED * cos(player->dir_angle + M_PI / 2) * delta_time;
-        player->position.y += MOVE_SPEED * sin(player->dir_angle + M_PI / 2) * delta_time;
-    }
-    else if (keystates.s_right) {
-        player->position.x -= MOVE_SPEED * cos(player->dir_angle + M_PI / 2) * delta_time;
-        player->position.y -= MOVE_SPEED * sin(player->dir_angle + M_PI / 2) * delta_time;
-    }
+    const int rightAxis = keystates.s_right - keystates.s_left;
+    player->position.x -= rightAxis * MOVE_SPEED * cos(player->dir_angle + M_PI / 2) * delta_time;
+    player->position.y -= rightAxis * MOVE_SPEED * sin(player->dir_angle + M_PI / 2) * delta_time;
 
-    if (keystates.up) {
-        player->z += ELEVATION_SPEED * delta_time;
-    }
-    else if (keystates.down) {
-        player->z -= ELEVATION_SPEED * delta_time;
-    }
+    const int rotAxis = keystates.left - keystates.right;
+    player->dir_angle += rotAxis * ROT_SPEED * delta_time;
+
+    const int upAxis = keystates.up - keystates.down;
+    player->z += upAxis * ELEVATION_SPEED * delta_time;
 }
 
 void K_HandleRealtimeKeys(SDL_Scancode key_scancode, enum KBD_KEY_STATE state) {

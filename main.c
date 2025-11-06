@@ -8,7 +8,7 @@
 
 #define SCREENW 1024
 #define SCREENH 768
-#define FPS 120
+#define FPS 60
 
 void GameLoop(game_state_t *game_state, player_t *player) {
     while (game_state->is_running) {

@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 
-void W_Init(const unsigned int winw, const unsigned int winh);
+void W_Init(const unsigned int window_w, const unsigned int window_h);
 void W_Shutdown();
 SDL_Window* W_Get();
 

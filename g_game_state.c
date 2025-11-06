@@ -9,7 +9,7 @@ game_state_t G_Init(const unsigned int screenw, const unsigned int screenh, int 
     game_state.screen_w = screenw;
     game_state.screen_h = screenh;
     game_state.target_fps = target_fps;
-    game_state.target_frame_time = 1.0 / (double) game_state.target_fps;
+    game_state.target_frame_time = 1.0 / game_state.target_fps;
     game_state.delta_time = game_state.target_frame_time;
     game_state.is_running = true;
     game_state.is_paused = false;
@@ -28,7 +28,7 @@ void G_FrameEnd(game_state_t *state) {
     state->delta_time = (SDL_GetTicks() - frame_start) / 1000.0;
 
     if (state->delta_time < state->target_frame_time) {
-        SDL_Delay((Uint32)(state->target_frame_time - state->delta_time) * 1000);
+        SDL_Delay((state->target_frame_time - state->delta_time) * 1000);
         state->delta_time = state->target_frame_time;
     }
 }

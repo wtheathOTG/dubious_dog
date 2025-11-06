@@ -58,8 +58,8 @@ void R_InitScreen(int w, int h) {
 
 void R_Init(SDL_Window* main_win, game_state_t *game_state) {
     window = main_win;
-    screenw = game_state->screen_w;
-    screenh = game_state->screen_h;
+    screenw = game_state->screen_w / 2;
+    screenh = game_state->screen_h / 2;
 
     sdl_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     R_InitScreen(screenw, screenh);
@@ -125,6 +125,21 @@ void R_ClearScreenBuffer() {
     memset(screen_buffer, 0, sizeof(uint32_t) * screenw * screenh);
 }
 
+void R_ClipBehindPlayer(double *ax, double *ay, double bx, double by) {
+    double px1 = 1;
+    double py1 = 1;
+    double px2 = 200;
+    double py2 = 1;
+
+    double a = (px1 - px2) * (*ay - py2) - (py1 - py2) * (*ax - px2);
+    double b = (py1 - py2) * (*ax - bx) - (px1 - px2) * (*ay - by);
+
+    double t = a / b;
+
+    *ax = *ax - (t * (bx - *ax));
+    *ay = *ay - (t * (by - *ay));
+}
+
 void R_RenderSectors(player_t *player, game_state_t *game_state) {
     double screen_half_w = screenw / 2;
     double screen_half_h = screenh / 2;
@@ -155,6 +170,12 @@ void R_RenderSectors(player_t *player, game_state_t *game_state) {
             double wz1 = dx1 * CN + dy1 * SN;
             double wx2 = dx2 * SN - dy2 * CN;
             double wz2 = dx2 * CN + dy2 * SN;
+
+            //if z1 and z2 < 0 (wall completely behind player) -- skip it
+            //if z1 or z2 is behind the player -- clip it
+            if (wz1 < 0 && wz2 < 0) continue;
+            if (wz1 < 0) R_ClipBehindPlayer(&wx1, &wz1, wx2, wz2);
+            else if (wz2 < 0) R_ClipBehindPlayer(&wx2, &wz2, wx1, wz1);
 
             //calc wall height based on distance
             double wh1 = (sector_h / wz1) * fov;
@@ -220,7 +241,7 @@ sector_t R_CreateSector(int height, int elevation, unsigned int color, unsigned 
     sector.color = color;
     sector.ceil_clr = ceil_clr;
     sector.floor_clr = floor_clr;
-    sector.id = ++ sector_id;
+    sector.id = ++sector_id;
 
     return sector;
 }

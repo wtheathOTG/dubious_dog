@@ -2,14 +2,14 @@
 
 SDL_Window *sdl_window = NULL;
 
-void W_Init(const unsigned int winw, const unsigned int winh) {
+void W_Init(const unsigned int window_w, const unsigned int window_h) {
     SDL_Init(SDL_INIT_EVERYTHING);
     sdl_window = SDL_CreateWindow(
         "Dubious Dog",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        winw,
-        winh,
+        window_w,
+        window_h,
         SDL_WINDOW_SHOWN
     );
 }
